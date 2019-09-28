@@ -11,13 +11,12 @@
  * @link        https://www.originphp.com
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-namespace Origin\Http;
 
-use Origin\Http\Request;
-use Origin\Http\Response;
-use App\Http\Application;
+namespace Origin\Http\Controller\Component\Exception;
 
-$request = new Request();
-$response =  new Response();
-$Application = new Application($request, $response);
-$response->send();
+use Origin\Exception\Exception;
+
+class MissingComponentException extends Exception
+{
+    protected $template = '%s could not be found.';
+}
