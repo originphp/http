@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * OriginPHP Framework
  * Copyright 2018 - 2019 Jamiel Sharief.
@@ -11,7 +12,10 @@
  * @link        https://www.originphp.com
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-namespace Origin\Http;
+namespace Origin\Http\Middleware;
+
+use Origin\Http\Request;
+use Origin\Http\Response;
 
 class MiddlewareRunner
 {
@@ -30,7 +34,7 @@ class MiddlewareRunner
     /**
      * Adds a middleware to the runner
      *
-     * @param \Origin\Http\Middleware $object
+     * @param \Origin\Http\Middleware\Middleware $object
      * @return void
      */
     public function add(Middleware $object)
@@ -45,19 +49,18 @@ class MiddlewareRunner
      * @param \Origin\Http\Response $response
      * @return \Origin\Http\Response $response
      */
-    public function run(Request $request, Response $response)
+    public function run(Request $request, Response $response) : Response
     {
         return $this->__invoke($request, $response);
     }
-
     /**
      * Magic Method
      *
      * @param \Origin\Http\Request $request
      * @param \Origin\Http\Response $response
-     * @return Mixed
+     * @return \Origin\Http\Response $response
      */
-    public function __invoke(Request $request, Response $response)
+    public function __invoke(Request $request, Response $response) : Response
     {
         if (isset($this->middlewareStack[$this->current])) {
             $next = $this->middlewareStack[$this->current];

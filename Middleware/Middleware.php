@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * OriginPHP Framework
  * Copyright 2018 - 2019 Jamiel Sharief.
@@ -14,48 +15,23 @@
 /**
  * You can use startup/shutdown or handle/process but not both.
  */
-namespace Origin\Http;
+namespace Origin\Http\Middleware;
 
-use Origin\Core\ConfigTrait;
+use Origin\Http\Request;
+use Origin\Http\Response;
+use Origin\Core\HookTrait;
+use Origin\Configurable\InstanceConfigurable as Configurable;
 
 class Middleware
 {
-    use ConfigTrait;
+    use Configurable, HookTrait;
     /**
      * Constructor
      */
     public function __construct(array $config = [])
     {
         $this->config($config);
-        $this->initialize($config);
-    }
-    /**
-     * Hook called during construct
-     *
-     * @return void
-     */
-    public function initialize(array $config)
-    {
-    }
-    /**
-     * This HANDLES the request
-     *
-     * @param \Origin\Http\Request $request
-     * @return void
-     */
-    public function startup(Request $request)
-    {
-    }
-    /**
-     * This PROCESSES the response after all middleware requests have
-     * been handled
-     *
-     * @param \Origin\Http\Request $request
-     * @param \Origin\Http\Response $response
-     * @return void
-     */
-    public function shutdown(Request $request, Response $response)
-    {
+        $this->executeHook('initialize', [$config]);
     }
 
     /**
@@ -64,9 +40,8 @@ class Middleware
      * @param \Origin\Http\Request $request
      * @return void
      */
-    public function handle(Request $request)
+    public function handle(Request $request) : void
     {
-        $this->startup($request);
     }
     /**
      * This PROCESSES the response after all middleware requests have
@@ -76,9 +51,8 @@ class Middleware
      * @param \Origin\Http\Response $response
      * @return void
      */
-    public function process(Request $request, Response $response)
+    public function process(Request $request, Response $response) : void
     {
-        $this->shutdown($request, $response);
     }
 
     /**
@@ -89,13 +63,15 @@ class Middleware
      * @param callable $next
      * @return \Origin\Http\Response $response
      */
-    public function __invoke(Request $request, Response $response, callable $next = null)
+    public function __invoke(Request $request, Response $response, callable $next = null) : Response
     {
+        $this->executeHook('startup');
         $this->handle($request);
         if ($next) {
             $response = $next($request, $response);
         }
         $this->process($request, $response);
+        $this->executeHook('shutdown');
 
         return $response;
     }
